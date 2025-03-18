@@ -30,7 +30,7 @@ function HotelCard({ hotel }) {
       }
     } catch (error) {
       console.error("Error fetching hotel photo:", error);
-      setPhotoUrl("/src/assets/place.jpeg"); 
+      setPhotoUrl("/src/assets/place.jpeg");
     }
   };
 
@@ -47,7 +47,7 @@ function HotelCard({ hotel }) {
         <img
           src={photoUrl}
           className="rounded-lg h-56 w-96 object-cover"
-          onError={(e) => (e.target.src = "/src/assets/place.jpeg")} 
+          onError={(e) => (e.target.src = "/src/assets/place.jpeg")}
           alt={hotel.hotelName}
         />
         <div className="my-2 mx-2">
