@@ -9,19 +9,39 @@ function InfoSection({ trip }) {
 
   const [photoUrl,setPhotoUrl] = useState();
 
+  // useEffect(() => {
+  //   trip && GetPlacePhoto();
+  // }, [trip]);
   useEffect(() => {
-    trip && GetPlacePhoto();
+    if (trip) {
+      GetPlacePhoto();
+    }
   }, [trip]);
 
+
+
   const GetPlacePhoto = async () => {
-    const data = {
-      textQuery: trip?.userSelection?.location,
-    };
-    const result = await GetPlaceDetails(data).then((resp) => {
-      const photoUrl = PHOTO_REF_URL.replace("{NAME}", resp.data.places[0].photos[0].name);
-      setPhotoUrl(photoUrl);
-    });
+    try {
+      const data = {
+        textQuery: trip?.userSelection?.location,
+      };
+      const result = await GetPlaceDetails(data);
+
+      if (
+        result?.data?.places?.length > 0 &&
+        result.data.places[0].photos?.length > 0
+      ) {
+        const photoRef = result.data.places[0].photos[0].name;
+        const photoUrl = PHOTO_REF_URL.replace("{NAME}", photoRef);
+        setPhotoUrl(photoUrl);
+      } else {
+        console.error("No photo found for the given location.");
+      }
+    } catch (error) {
+      console.error("Error fetching place photo:", error);
+    }
   };
+
 
   return (
     <div>

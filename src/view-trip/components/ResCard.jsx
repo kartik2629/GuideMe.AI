@@ -2,25 +2,37 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { GetPlaceDetails, PHOTO_REF_URL } from "@/service/GlobalAPI";
+import defaultImage from "/src/assets/place.jpeg"; // Import fallback image
 
 function ResCard({ restaurant, index }) {
-  const [photoUrl, setPhotoUrl] = useState();
+  const [photoUrl, setPhotoUrl] = useState(defaultImage); // Default image initially
 
   useEffect(() => {
-    restaurant && GetPlacePhoto();
+    if (restaurant) {
+      GetPlacePhoto();
+    }
   }, [restaurant]);
 
   const GetPlacePhoto = async () => {
-    const data = {
-      textQuery: restaurant?.name,
-    };
-    const result = await GetPlaceDetails(data).then((resp) => {
-      const photoUrl = PHOTO_REF_URL.replace(
-        "{NAME}",
-        resp.data.places[0].photos[0].name
-      );
-      setPhotoUrl(photoUrl);
-    });
+    try {
+      const data = { textQuery: restaurant?.name };
+      const result = await GetPlaceDetails(data);
+
+      if (
+        result?.data?.places?.length > 0 &&
+        result.data.places[0].photos?.length > 0
+      ) {
+        const photoRef = result.data.places[0].photos[0].name;
+        const url = PHOTO_REF_URL.replace("{NAME}", photoRef);
+        setPhotoUrl(url);
+      } else {
+        console.warn("No photo found for:", restaurant.name);
+        setPhotoUrl(defaultImage); // Set fallback image
+      }
+    } catch (error) {
+      console.error("Error fetching restaurant photo:", error);
+      setPhotoUrl(defaultImage); // Set fallback image in case of error
+    }
   };
 
   return (
@@ -34,7 +46,12 @@ function ResCard({ restaurant, index }) {
       className="block text-inherit"
     >
       <div className="hover:scale-105 transition-all cursor-pointer shadow-xl rounded-md h-full">
-        <img src={photoUrl} className="rounded-lg h-56 w-96 object-cover" />
+        <img
+          src={photoUrl}
+          className="rounded-lg h-56 w-96 object-cover"
+          onError={(e) => (e.target.src = defaultImage)} // Fallback if image fails to load
+          alt={restaurant.name}
+        />
         <div className="my-2 mx-2">
           <h2 className="font-medium text-black">{restaurant.name}</h2>
           <div className="flex items-center gap-2">
@@ -59,13 +76,14 @@ function ResCard({ restaurant, index }) {
     </Link>
   );
 }
+
 ResCard.propTypes = {
   restaurant: PropTypes.shape({
-    name: PropTypes.string,
-    location: PropTypes.string,
-    priceRange: PropTypes.string,
-    cuisine: PropTypes.string,
-    description: PropTypes.string,
+    name: PropTypes.string.isRequired,
+    location: PropTypes.string.isRequired,
+    priceRange: PropTypes.string.isRequired,
+    cuisine: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
   }).isRequired,
   index: PropTypes.number,
 };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { GetPlaceDetails, PHOTO_REF_URL } from "@/service/GlobalAPI";
+import PropTypes from "prop-types";
 
 function PlacesToVisit({ trip }) {
   const itinerary = trip?.tripData?.tripData?.itinerary;
@@ -36,40 +37,46 @@ function PlacesToVisit({ trip }) {
   );
 }
 
-import PropTypes from "prop-types";
-
 function PlaceCard({ place }) {
   const [photoUrl, setPhotoUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    place && GetPlacePhoto(place.placeName);
+    if (place?.placeName) {
+      GetPlacePhoto(place.placeName);
+    }
   }, [place.placeName]);
 
   const GetPlacePhoto = async (placeName) => {
     if (!placeName) return;
     try {
+      setLoading(true);
       const data = { textQuery: placeName };
       const result = await GetPlaceDetails(data);
-      if (result?.data?.places[0]?.photos?.[3]?.name) {
-        const photoUrl = PHOTO_REF_URL.replace(
-          "{NAME}",
-          result.data.places[0].photos[3].name
-        );
-        setPhotoUrl(photoUrl);
+      if (result?.data?.places?.[0]?.photos?.[0]?.name) {
+        const photoRef = result.data.places[0].photos[0].name;
+        setPhotoUrl(PHOTO_REF_URL.replace("{NAME}", photoRef));
       }
     } catch (error) {
       console.error("Error fetching place photo:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="block text-inherit">
-      <div className="hover:scale-105 transition-all cursor-pointer shadow-xl rounded-md h-full flex ">
-        <img
-          src={photoUrl || "/src/assets/place.jpeg"}
-          alt={place.placeName}
-          className="rounded-lg h-40 w-64 object-cover"
-        />
+      <div className="hover:scale-105 transition-all cursor-pointer shadow-xl rounded-md h-full flex">
+        {loading ? (
+          <div className="h-40 w-64 bg-gray-300 animate-pulse rounded-lg" />
+        ) : (
+          <img
+            src={photoUrl || "/src/assets/place.jpeg"}
+            alt={place.placeName}
+            className="rounded-lg h-40 w-64 object-cover"
+            loading="lazy"
+          />
+        )}
         <div className="my-2 mx-2">
           <h2 className="font-medium text-black">{place.placeName}</h2>
           <p className="text-gray-600 text-sm">{place.details}</p>
@@ -96,25 +103,18 @@ function PlaceCard({ place }) {
   );
 }
 
-(PlacesToVisit.propTypes = {
+PlacesToVisit.propTypes = {
   trip: PropTypes.shape({
     tripData: PropTypes.shape({
       tripData: PropTypes.shape({
-        userSelection: PropTypes.shape({
-          location: PropTypes.string,
-        }),
         itinerary: PropTypes.objectOf(
           PropTypes.shape({
             theme: PropTypes.string,
             places: PropTypes.arrayOf(
               PropTypes.shape({
-                placeName: PropTypes.string,
+                placeName: PropTypes.string.isRequired,
                 details: PropTypes.string,
-                imageUrl: PropTypes.string,
-                coordinates: PropTypes.shape({
-                  latitude: PropTypes.number,
-                  longitude: PropTypes.number,
-                }),
+                address: PropTypes.string,
                 ticketPricing: PropTypes.string,
                 travelTime: PropTypes.string,
                 bestTimeToVisit: PropTypes.string,
@@ -126,17 +126,18 @@ function PlaceCard({ place }) {
       }),
     }),
   }),
-}),
-  (PlaceCard.propTypes = {
-    place: PropTypes.shape({
-      placeName: PropTypes.string.isRequired,
-      details: PropTypes.string,
-      address: PropTypes.string,
-      ticketPricing: PropTypes.string,
-      travelTime: PropTypes.string,
-      bestTimeToVisit: PropTypes.string,
-      contact: PropTypes.string,
-    }).isRequired,
-  });
+};
+
+PlaceCard.propTypes = {
+  place: PropTypes.shape({
+    placeName: PropTypes.string.isRequired,
+    details: PropTypes.string,
+    address: PropTypes.string,
+    ticketPricing: PropTypes.string,
+    travelTime: PropTypes.string,
+    bestTimeToVisit: PropTypes.string,
+    contact: PropTypes.string,
+  }).isRequired,
+};
 
 export default PlacesToVisit;
