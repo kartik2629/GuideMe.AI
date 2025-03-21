@@ -23,7 +23,7 @@ function Header() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   useEffect(() => {
-    console.log("user", user);
+    // console.log("user", user);
   }, []);
 
   const GetUserProfile = (tokenInfo) => {
@@ -38,7 +38,7 @@ function Header() {
         }
       )
       .then((resp) => {
-        console.log(resp);
+        // console.log(resp);
         localStorage.setItem("user", JSON.stringify(resp.data));
         setOpenDialog(false);
         window.location.reload();
@@ -52,7 +52,9 @@ function Header() {
 
   return (
     <div className="p-3 shadow-sm flex justify-between items-center px-5">
-      <img className="head-logo" src="/guidemeai.png" />
+      <a href="/" className="hover:cursor-pointer">
+        <img className="head-logo" src="/guidemeai.png" />
+      </a>
       <div>
         {user ? (
           <div className="flex items-center gap-3">
@@ -64,8 +66,9 @@ function Header() {
             <Popover>
               <PopoverTrigger className="bg-white border-none">
                 <img
-                  src={user?.picture}
+                  src={user?.picture || "/guidemeai.png"}
                   className="h-[40px] w-[40px] rounded-full"
+                  alt="User"
                 />
               </PopoverTrigger>
               <PopoverContent>
@@ -90,7 +93,15 @@ function Header() {
         <DialogContent>
           <DialogHeader>
             <DialogDescription>
-              <img src="/public/guidemeai.png" alt="" className="head-logo" />
+              <div className="flex justify-between items-center">
+                <img src="/public/guidemeai.png" alt="" className="head-logo" />
+                <Button
+                  className="h-10 w-10"
+                  onClick={() => setOpenDialog(false)}
+                >
+                  X
+                </Button>
+              </div>
               <h2 className="font-bold text-lg mt-7">Sign In With Google</h2>
               <p>Sign in with google authentication securely</p>
               <Button
@@ -109,3 +120,4 @@ function Header() {
 }
 
 export default Header;
+

@@ -61,7 +61,8 @@ function CreateTrip() {
         }
       )
       .then((resp) => {
-        console.log(resp);
+        // console.log(resp);
+
         localStorage.setItem("user", JSON.stringify(resp.data));
         setOpenDialog(false);
         OnGenerateTrip();
@@ -101,7 +102,7 @@ function CreateTrip() {
 
       return;
     }
-    console.log(formData);
+    // console.log(formData);
     setLoading(true);
     const FINAL_PROMPT = AI_PROMPT.replace("{location}", formData?.location)
       .replace("{numberOfDays}", formData?.numberOfDays)
@@ -112,10 +113,10 @@ function CreateTrip() {
       .replace("{numberOfDays}", formData?.numberOfDays)
       .replace("{location}", formData?.location?.label);
 
-    console.log(FINAL_PROMPT);
+    // console.log(FINAL_PROMPT);
 
     const result = await chatSession.sendMessage(FINAL_PROMPT);
-    console.log("--", result?.response?.text());
+    // console.log("--", result?.response?.text());
     setLoading(false);
     SaveAiTrip(result?.response?.text());
   };
@@ -154,6 +155,8 @@ function CreateTrip() {
           <Input
             placeholder={"Ex. 3"}
             type="number"
+            id="numberOfDays"
+            className="no-spinner"
             onChange={(e) => handleInputChange("numberOfDays", e.target.value)}
           />
         </div>
@@ -208,7 +211,7 @@ function CreateTrip() {
 
         <div>
           <h2 className="text-xl my-3 font-medium">
-            Who do you plan on travelling on your next adventure?
+            What type of plan do you want on your next trip?
           </h2>
           <div className="grid grid-cols-3 justify-between gap-5 mt-5 transition-all">
             {SelectDestinationType.map((item, index) => (
@@ -241,7 +244,15 @@ function CreateTrip() {
         <DialogContent>
           <DialogHeader>
             <DialogDescription>
-              <img src="guidemeai.png" alt="" className="head-logo" />
+              <div className="flex justify-between items-center">
+                <img src="/public/guidemeai.png" alt="" className="head-logo" />
+                <Button
+                  className="h-10 w-10"
+                  onClick={() => setOpenDialog(false)}
+                >
+                  X
+                </Button>
+              </div>
               <h2 className="font-bold text-lg mt-7">Sign In With Google</h2>
               <p>Sign in with google authentication securely</p>
               <Button
