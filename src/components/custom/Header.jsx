@@ -1,4 +1,4 @@
-import "./../../../public/a.css";
+import "../../../public/a.css";
 import { Button } from "../ui/button";
 import { LuLogOut } from "react-icons/lu";
 import {
@@ -120,4 +120,3 @@ function Header() {
 }
 
 export default Header;
-
