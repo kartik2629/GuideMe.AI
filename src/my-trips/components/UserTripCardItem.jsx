@@ -40,8 +40,8 @@ function UserTripCardItem({ trip }) {
   };
 
   return (
-    <Link to={`/view-trip/${trip?.id}`} className="text-black">
-      <div className="rounded-xl shadow-md overflow-hidden border border-gray-200 hover:scale-105 transform transition-all duration-500 hover:black">
+    <Link to={`/view-trip/${trip?.id}`} className="text-black hover:text-black">
+      <div className="rounded-xl shadow-md overflow-hidden border border-gray-200 hover:scale-105 transform transition-all duration-300 hover:black">
         <img
           src={photoUrl}
           className="w-full h-[200px] object-cover rounded-t-xl"
@@ -70,4 +70,3 @@ UserTripCardItem.propTypes = {
 };
 
 export default UserTripCardItem;
-
