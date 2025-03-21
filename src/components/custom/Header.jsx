@@ -94,7 +94,7 @@ function Header() {
           <DialogHeader>
             <DialogDescription>
               <div className="flex justify-between items-center">
-                <img src="/public/guidemeai.png" alt="" className="head-logo" />
+                <img src="/guidemeai.png" alt="" className="head-logo" />
                 <Button
                   className="h-10 w-10"
                   onClick={() => setOpenDialog(false)}
