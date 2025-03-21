@@ -1,13 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { GetPlaceDetails, PHOTO_REF_URL } from "@/service/GlobalAPI";
+import { GetPlaceDetails } from "@/service/GlobalAPI";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { FaShareSquare } from "react-icons/fa";
 
-
 function InfoSection({ trip }) {
-
-  const [photoUrl,setPhotoUrl] = useState();
+  const [photoUrl, setPhotoUrl] = useState();
 
   // useEffect(() => {
   //   trip && GetPlacePhoto();
@@ -18,10 +16,12 @@ function InfoSection({ trip }) {
     }
   }, [trip]);
 
-
-
   const GetPlacePhoto = async () => {
     try {
+      const PHOTO_REF_URL =
+        "https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=2160&maxWidthPx=3840&key=" +
+        import.meta.env.VITE_GOOGLE_PLACE_API_KEY;
+
       const data = {
         textQuery: trip?.userSelection?.location,
       };
@@ -31,7 +31,8 @@ function InfoSection({ trip }) {
         result?.data?.places?.length > 0 &&
         result.data.places[0].photos?.length > 0
       ) {
-        const photoRef = result.data.places[0].photos[0].name;
+        const photoRef = result.data.places[0].photos[1].name;
+        console.log(photoRef);
         const photoUrl = PHOTO_REF_URL.replace("{NAME}", photoRef);
         setPhotoUrl(photoUrl);
       } else {
@@ -41,7 +42,6 @@ function InfoSection({ trip }) {
       console.error("Error fetching place photo:", error);
     }
   };
-
 
   return (
     <div>
