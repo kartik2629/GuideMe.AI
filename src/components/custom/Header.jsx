@@ -71,7 +71,7 @@ function Header() {
             <Popover>
               <PopoverTrigger className="bg-white border-none">
                 <img
-                  src={user?.picture || "/guidemeai.png"}
+                  src={user?.picture?user?.picture : "/guidemeai.png"}
                   className="h-[40px] w-[40px] rounded-full"
                   alt="User"
                 />
