@@ -1,9 +1,12 @@
 import { GetPlaceDetails } from "@/service/GlobalAPI";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { doc, deleteDoc } from "firebase/firestore";
+import { db } from "@/service/firebaseConfig";
 import PropTypes from "prop-types";
+import { FaTrash } from "react-icons/fa";
 
-function UserTripCardItem({ trip }) {
+function UserTripCardItem({ trip, onDelete }) {
   const [photoUrl, setPhotoUrl] = useState();
 
   useEffect(() => {
@@ -28,7 +31,6 @@ function UserTripCardItem({ trip }) {
         result.data.places[0].photos?.length > 0
       ) {
         const photoRef = result.data.places[0].photos[1].name;
-        console.log(photoRef);
         const photoUrl = PHOTO_REF_URL.replace("{NAME}", photoRef);
         setPhotoUrl(photoUrl);
       } else {
@@ -39,25 +41,46 @@ function UserTripCardItem({ trip }) {
     }
   };
 
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this trip?")) {
+      try {
+        await deleteDoc(doc(db, "GuideMeAi", trip.id));
+        onDelete(trip.id); 
+      } catch (error) {
+        console.error("Error deleting trip:", error);
+      }
+    }
+  };
+
   return (
-    <Link to={`/view-trip/${trip?.id}`} className="text-black hover:text-black">
-      <div className="rounded-xl shadow-md overflow-hidden border border-gray-200 hover:scale-105 transform transition-all duration-300 hover:black">
+    <div className="rounded-xl shadow-md overflow-hidden border border-gray-200 hover:scale-105 transform transition-all duration-300">
+      <Link
+        to={`/view-trip/${trip?.id}`}
+        className="text-black hover:text-black"
+      >
         <img
           src={photoUrl}
           className="w-full h-[200px] object-cover rounded-t-xl"
           alt="Trip Location"
         />
-        <div className="p-3">
-          <h2 className="font-bold text-lg">{trip?.userSelection?.location}</h2>
-          <h2 className="text-sm text-gray-600">
-            {trip?.userSelection?.numberOfDays} Days trip with{" "}
-            {trip?.userSelection?.budget} Budget{" "}
-          </h2>
-        </div>
+      </Link>
+      <div className="p-3">
+        <h2 className="font-bold text-lg">{trip?.userSelection?.location}</h2>
+        <h2 className="text-sm text-gray-600">
+          {trip?.userSelection?.numberOfDays} Days trip with{" "}
+          {trip?.userSelection?.budget} Budget
+        </h2>
+        <button
+          onClick={handleDelete}
+          className="absolute top-3 right-3 bg-red-500 text-white p-2 rounded-full hover:bg-red-700 transition"
+        >
+          <FaTrash />
+        </button>
       </div>
-    </Link>
+    </div>
   );
 }
+
 UserTripCardItem.propTypes = {
   trip: PropTypes.shape({
     id: PropTypes.string.isRequired,
@@ -67,6 +90,7 @@ UserTripCardItem.propTypes = {
       budget: PropTypes.number,
     }),
   }).isRequired,
+  onDelete: PropTypes.func.isRequired,
 };
 
 export default UserTripCardItem;

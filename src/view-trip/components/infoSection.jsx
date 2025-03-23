@@ -32,7 +32,7 @@ function InfoSection({ trip }) {
         result.data.places[0].photos?.length > 0
       ) {
         const photoRef = result.data.places[0].photos[1].name;
-        console.log(photoRef);
+        // console.log(photoRef);
         const photoUrl = PHOTO_REF_URL.replace("{NAME}", photoRef);
         setPhotoUrl(photoUrl);
       } else {
