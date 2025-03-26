@@ -19,7 +19,7 @@ function InfoSection({ trip }) {
   const GetPlacePhoto = async () => {
     try {
       const PHOTO_REF_URL =
-        "https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=2160&maxWidthPx=3840&key=" +
+        "https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=720&maxWidthPx=1080&key=" +
         import.meta.env.VITE_GOOGLE_PLACE_API_KEY;
 
       const data = {

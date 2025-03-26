@@ -61,7 +61,7 @@ function UserTripCardItem({ trip, onDelete }) {
         <img
           src={photoUrl}
           className="w-full h-[200px] object-cover rounded-t-xl"
-          alt="Trip Location"
+          alt={trip?.userSelection?.location}
         />
       </Link>
       <div className="p-3">
