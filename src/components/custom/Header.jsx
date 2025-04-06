@@ -20,11 +20,21 @@ import axios from "axios";
 
 function Header() {
   const [openDialog, setOpenDialog] = useState(false);
+  const [user, setUser] = useState(null);
 
-  const user = JSON.parse(localStorage.getItem("user"));
   useEffect(() => {
-    // console.log("user", user);
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
   }, []);
+
+  const getGoogleProfileUrl = (picture) => {
+    if (!picture) return "/guidemeai.png";
+    return picture.startsWith("https")
+      ? picture
+      : `https://lh3.googleusercontent.com/${picture}`;
+  };
 
   const GetUserProfile = (tokenInfo) => {
     axios
@@ -33,15 +43,18 @@ function Header() {
         {
           headers: {
             Authorization: `Bearer ${tokenInfo?.access_token}`,
-            Accept: "Application/json",
+            Accept: "application/json",
           },
         }
       )
       .then((resp) => {
-        // console.log(resp);
         localStorage.setItem("user", JSON.stringify(resp.data));
+        setUser(resp.data);
         setOpenDialog(false);
         window.location.reload();
+      })
+      .catch((err) => {
+        console.error("Error fetching profile:", err);
       });
   };
 
@@ -50,10 +63,17 @@ function Header() {
     onError: (error) => console.log(error),
   });
 
+  const handleLogout = () => {
+    googleLogout();
+    localStorage.clear();
+    setUser(null);
+    window.location.reload();
+  };
+
   return (
     <div className="p-3 shadow-sm flex justify-between items-center px-5">
       <a href="/" className="hover:cursor-pointer">
-        <img className="head-logo" src="/guidemeai.png" />
+        <img className="head-logo" src="/guidemeai.png" alt="Logo" />
       </a>
       <div>
         {user ? (
@@ -71,18 +91,18 @@ function Header() {
             <Popover>
               <PopoverTrigger className="bg-white border-none">
                 <img
-                  src={user?.picture?user?.picture : "/guidemeai.png"}
+                  src={getGoogleProfileUrl(user.picture)}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/guidemeai.png";
+                  }}
                   className="h-[40px] w-[40px] rounded-full"
                   alt="User"
                 />
               </PopoverTrigger>
               <PopoverContent>
                 <div
-                  onClick={() => {
-                    googleLogout();
-                    localStorage.clear();
-                    window.location.reload();
-                  }}
+                  onClick={handleLogout}
                   className="flex cursor-pointer justify-center gap-2 items-center"
                 >
                   <LuLogOut /> Logout
@@ -94,21 +114,18 @@ function Header() {
           <Button onClick={() => setOpenDialog(true)}>Sign In</Button>
         )}
       </div>
-      <Dialog open={openDialog}>
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogDescription>
               <div className="flex justify-between items-center">
                 <img src="/guidemeai.png" alt="" className="head-logo" />
-                <Button
-                  className="h-10 w-10"
-                  onClick={() => setOpenDialog(false)}
-                >
+                <Button className="h-10 w-10" onClick={() => setOpenDialog(false)}>
                   X
                 </Button>
               </div>
               <h2 className="font-bold text-lg mt-7">Sign In With Google</h2>
-              <p>Sign in with google authentication securely</p>
+              <p>Sign in with Google authentication securely</p>
               <Button
                 onClick={login}
                 className="mt-5 w-full flex gap-4 items-center"
