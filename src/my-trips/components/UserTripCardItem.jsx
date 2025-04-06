@@ -86,8 +86,8 @@ UserTripCardItem.propTypes = {
     id: PropTypes.string.isRequired,
     userSelection: PropTypes.shape({
       location: PropTypes.string,
-      numberOfDays: PropTypes.number,
-      budget: PropTypes.number,
+      numberOfDays: PropTypes.string,
+      budget: PropTypes.string,
     }),
   }).isRequired,
   onDelete: PropTypes.func.isRequired,
