@@ -29,17 +29,10 @@ function Header() {
     }
   }, []);
 
-  const getGoogleProfileUrl = (picture) => {
-    if (!picture) return "/guidemeai.png";
-    return picture.startsWith("https")
-      ? picture
-      : `https://lh3.googleusercontent.com/${picture}`;
-  };
-
   const GetUserProfile = (tokenInfo) => {
     axios
       .get(
-        `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`,
+        `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokenInfo?.access_token}`,
         {
           headers: {
             Authorization: `Bearer ${tokenInfo?.access_token}`,
@@ -51,7 +44,6 @@ function Header() {
         localStorage.setItem("user", JSON.stringify(resp.data));
         setUser(resp.data);
         setOpenDialog(false);
-        window.location.reload();
       })
       .catch((err) => {
         console.error("Error fetching profile:", err);
@@ -67,7 +59,7 @@ function Header() {
     googleLogout();
     localStorage.clear();
     setUser(null);
-    window.location.reload();
+    location.href = "/";
   };
 
   return (
@@ -91,10 +83,9 @@ function Header() {
             <Popover>
               <PopoverTrigger className="bg-white border-none">
                 <img
-                  src={getGoogleProfileUrl(user.picture)}
+                  src={user?.picture || "/guidemeai.png"}
                   onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "/guidemeai.png";
+                    e.currentTarget.src = "/guidemeai.png";
                   }}
                   className="h-[40px] w-[40px] rounded-full"
                   alt="User"
@@ -114,13 +105,17 @@ function Header() {
           <Button onClick={() => setOpenDialog(true)}>Sign In</Button>
         )}
       </div>
+
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogDescription>
               <div className="flex justify-between items-center">
                 <img src="/guidemeai.png" alt="" className="head-logo" />
-                <Button className="h-10 w-10" onClick={() => setOpenDialog(false)}>
+                <Button
+                  className="h-10 w-10"
+                  onClick={() => setOpenDialog(false)}
+                >
                   X
                 </Button>
               </div>
