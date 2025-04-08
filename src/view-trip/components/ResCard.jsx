@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { GetPlaceDetails, PHOTO_REF_URL } from "@/service/GlobalAPI";
-import defaultImage from "/src/assets/place.jpeg"; // Import fallback image
+import defaultImage from "/src/assets/place.jpeg";
 
 function ResCard({ restaurant, index }) {
-  const [photoUrl, setPhotoUrl] = useState(defaultImage); // Default image initially
+  const [photoUrl, setPhotoUrl] = useState();
 
   useEffect(() => {
     if (restaurant) {
@@ -14,25 +14,16 @@ function ResCard({ restaurant, index }) {
   }, [restaurant]);
 
   const GetPlacePhoto = async () => {
-    try {
-      const data = { textQuery: restaurant?.name };
-      const result = await GetPlaceDetails(data);
-
-      if (
-        result?.data?.places?.length > 0 &&
-        result.data.places[0].photos?.length > 0
-      ) {
-        const photoRef = result.data.places[0].photos[0].name;
-        const url = PHOTO_REF_URL.replace("{NAME}", photoRef);
-        setPhotoUrl(url);
-      } else {
-        console.warn("No photo found for:", restaurant.name);
-        setPhotoUrl(defaultImage); // Set fallback image
-      }
-    } catch (error) {
-      console.error("Error fetching restaurant photo:", error);
-      setPhotoUrl(defaultImage); // Set fallback image in case of error
-    }
+    const data = {
+      textQuery: restaurant.name,
+    };
+    await GetPlaceDetails(data).then((resp) => {
+      const PhotoUrl = PHOTO_REF_URL.replace(
+        "{NAME}",
+        resp.data.places[0].photos[2].name
+      );
+      setPhotoUrl(PhotoUrl);
+    });
   };
 
   return (

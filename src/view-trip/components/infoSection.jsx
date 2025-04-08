@@ -4,43 +4,27 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { FaShareSquare } from "react-icons/fa";
 
+const PHOTO_REF_URL =
+  "https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=1080&maxWidthPx=1080&key=" +
+  import.meta.env.VITE_GOOGLE_PLACE_API_KEY;
 function InfoSection({ trip }) {
-  const [photoUrl, setPhotoUrl] = useState();
+  const [photoUrl, setPhotoUrl] = useState(null);
 
-  // useEffect(() => {
-  //   trip && GetPlacePhoto();
-  // }, [trip]);
   useEffect(() => {
-    if (trip) {
-      GetPlacePhoto();
-    }
+    trip && GetPlacePhoto();
   }, [trip]);
 
   const GetPlacePhoto = async () => {
-    try {
-      const PHOTO_REF_URL =
-        "https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=720&maxWidthPx=1080&key=" +
-        import.meta.env.VITE_GOOGLE_PLACE_API_KEY;
-
-      const data = {
-        textQuery: trip?.userSelection?.location,
-      };
-      const result = await GetPlaceDetails(data);
-
-      if (
-        result?.data?.places?.length > 0 &&
-        result.data.places[0].photos?.length > 0
-      ) {
-        const photoRef = result.data.places[0].photos[1].name;
-        // console.log(photoRef);
-        const photoUrl = PHOTO_REF_URL.replace("{NAME}", photoRef);
-        setPhotoUrl(photoUrl);
-      } else {
-        console.error("No photo found for the given location.");
-      }
-    } catch (error) {
-      console.error("Error fetching place photo:", error);
-    }
+    const data = {
+      textQuery: trip?.userSelection?.location,
+    };
+    await GetPlaceDetails(data).then((resp) => {
+      const PhotoUrl = PHOTO_REF_URL.replace(
+        "{NAME}",
+        resp.data.places[0].photos[3].name
+      );
+      setPhotoUrl(PhotoUrl);
+    });
   };
 
   return (
