@@ -1,8 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { GetPlaceDetails } from "@/service/GlobalAPI";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { FaShareSquare } from "react-icons/fa";
 
 const PHOTO_REF_URL =
   "https://places.googleapis.com/v1/{NAME}/media?maxHeightPx=1080&maxWidthPx=1080&key=" +
@@ -53,9 +51,6 @@ function InfoSection({ trip }) {
             </h2>
           </div>
         </div>
-        <Button>
-          <FaShareSquare />
-        </Button>
       </div>
     </div>
   );

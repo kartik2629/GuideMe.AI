@@ -67,7 +67,7 @@ function Header() {
   };
 
   return (
-    <div className="p-3 shadow-sm flex justify-between items-center px-5">
+    <div className="p-3 shadow-md flex justify-between items-center px-5 rounded-b-xl bg-gradient-to-r from-sky-200 via-yellow-100 to-lime-200 backdrop-blur-sm bg-opacity-60">
       <a href="/" className="hover:cursor-pointer">
         <img className="head-logo" src="/guidemeai.png" alt="Logo" />
       </a>
@@ -85,10 +85,11 @@ function Header() {
                 My Trips
               </Button>
             </a>
+           
 
             {/* Profile Popover */}
             <Popover>
-              <PopoverTrigger className="bg-white border-none">
+              <PopoverTrigger className="bg-[#fff0] border-none">
                 <img
                   src={user.picture || "/guidemeai.png"}
                   onError={(e) => {
