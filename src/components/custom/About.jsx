@@ -43,9 +43,11 @@ const About = () => {
 
           {/* Button */}
           <div className="mt-10">
-            <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold shadow-md transition-all">
-              Learn More
-            </button>
+            <a href="/services">
+              <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold shadow-md transition-all">
+                Learn More
+              </button>
+            </a>
           </div>
         </div>
       </div>

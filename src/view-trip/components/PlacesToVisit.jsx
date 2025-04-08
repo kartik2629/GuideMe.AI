@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { GetPlaceDetails, PHOTO_REF_URL } from "@/service/GlobalAPI";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 function PlacesToVisit({ trip }) {
   const itinerary = trip?.tripData?.tripData?.itinerary;
@@ -66,39 +67,48 @@ function PlaceCard({ place }) {
 
   return (
     <div className="block text-inherit">
-      <div className="hover:scale-105 transition-all cursor-pointer shadow-xl rounded-md h-full flex">
-        {loading ? (
-          <div className="h-40 w-64 bg-gray-300 animate-pulse rounded-lg" />
-        ) : (
-          <img
-            src={photoUrl || "/src/assets/place.jpeg"}
-            alt={place.placeName}
-            className="rounded-lg h-40 w-64 object-cover"
-            loading="lazy"
-          />
-        )}
-        <div className="my-2 mx-2">
-          <h2 className="font-medium text-black">{place.placeName}</h2>
-          <p className="text-gray-600 text-sm">{place.details}</p>
-          <div className="flex flex-col gap-1 mt-2">
-            {place.address && (
-              <p className="text-gray-700">📍 {place.address}</p>
-            )}
-            {place.ticketPricing && (
-              <p className="text-gray-700">🎟 {place.ticketPricing}</p>
-            )}
-            {place.travelTime && (
-              <p className="text-gray-700">🕒 {place.travelTime}</p>
-            )}
-            {place.bestTimeToVisit && (
-              <p className="text-gray-700">⏰ {place.bestTimeToVisit}</p>
-            )}
-            {place.contact && (
-              <p className="text-gray-700">📞 {place.contact}</p>
-            )}
+      <Link
+        to={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          place.placeName
+        )}+${encodeURIComponent(place.placeName)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-inherit"
+      >
+        <div className="hover:scale-105 transition-all cursor-pointer shadow-xl rounded-md h-full flex">
+          {loading ? (
+            <div className="h-40 w-64 bg-gray-300 animate-pulse rounded-lg" />
+          ) : (
+            <img
+              src={photoUrl || "/src/assets/place.jpeg"}
+              alt={place.placeName}
+              className="rounded-lg h-40 w-64 object-cover"
+              loading="lazy"
+            />
+          )}
+          <div className="my-2 mx-2">
+            <h2 className="font-medium text-black">{place.placeName}</h2>
+            <p className="text-gray-600 text-sm">{place.details}</p>
+            <div className="flex flex-col gap-1 mt-2">
+              {place.address && (
+                <p className="text-gray-700">📍 {place.address}</p>
+              )}
+              {place.ticketPricing && (
+                <p className="text-gray-700">🎟 {place.ticketPricing}</p>
+              )}
+              {place.travelTime && (
+                <p className="text-gray-700">🕒 {place.travelTime}</p>
+              )}
+              {place.bestTimeToVisit && (
+                <p className="text-gray-700">⏰ {place.bestTimeToVisit}</p>
+              )}
+              {place.contact && (
+                <p className="text-gray-700">📞 {place.contact}</p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }

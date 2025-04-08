@@ -15,7 +15,7 @@ function Hero() {
         embark today!
       </p>
       <Link to="/create-trip">
-        <Button className="bg-black border-slate-500 text-[#dad2b3] hover:bg-[#fff] hover:text-[#b7ae4c]">
+        <Button className="bg-black border-slate-500 text-[#dad2b3] hover:bg-[#d8d8d8] hover:text-[#2f2c12] transition-all duration-600">
           Get Started, Its Free
         </Button>
       </Link>

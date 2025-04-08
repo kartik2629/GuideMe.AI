@@ -6,6 +6,7 @@ import UserTripCardItem from "./components/UserTripCardItem";
 
 function MyTrips() {
   const [userTrips, setUserTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +31,9 @@ function MyTrips() {
       id: doc.id,
       ...doc.data(),
     }));
+
     setUserTrips(trips);
+    setLoading(false);
   };
 
   const handleDeleteTrip = async () => {
@@ -41,7 +44,24 @@ function MyTrips() {
     <div className="sm:px-10 md:px-32 lg:px-56 xl:px-72 px-5 mt-10">
       <h2 className="font-bold text-3xl">My Trips</h2>
 
-      {userTrips.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center mt-10">
+          <div className="flex space-x-2 mb-8">
+            <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+            <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
+            {[...Array(6)].map((_, index) => (
+              <div
+                key={index}
+                className="h-48 rounded-lg bg-gray-200 animate-pulse"
+              ></div>
+            ))}
+          </div>
+        </div>
+      ) : userTrips.length === 0 ? (
         <p className="text-gray-500 mt-5 text-center">
           No itineraries created yet.
         </p>

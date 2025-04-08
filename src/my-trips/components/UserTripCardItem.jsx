@@ -8,6 +8,7 @@ import { FaTrash } from "react-icons/fa";
 
 function UserTripCardItem({ trip, onDelete }) {
   const [photoUrl, setPhotoUrl] = useState();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (trip) {
@@ -31,13 +32,15 @@ function UserTripCardItem({ trip, onDelete }) {
         result.data.places[0].photos?.length > 0
       ) {
         const photoRef = result.data.places[0].photos[1].name;
-        const photoUrl = PHOTO_REF_URL.replace("{NAME}", photoRef);
-        setPhotoUrl(photoUrl);
+        const url = PHOTO_REF_URL.replace("{NAME}", photoRef);
+        setPhotoUrl(url);
       } else {
         console.error("No photo found for the given location.");
       }
     } catch (error) {
       console.error("Error fetching place photo:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,7 +48,7 @@ function UserTripCardItem({ trip, onDelete }) {
     if (window.confirm("Are you sure you want to delete this trip?")) {
       try {
         await deleteDoc(doc(db, "GuideMeAi", trip.id));
-        onDelete(trip.id); 
+        onDelete(trip.id);
       } catch (error) {
         console.error("Error deleting trip:", error);
       }
@@ -53,16 +56,21 @@ function UserTripCardItem({ trip, onDelete }) {
   };
 
   return (
-    <div className="rounded-xl shadow-md overflow-hidden border border-gray-200 hover:scale-105 transform transition-all duration-300">
+    <div className="rounded-xl shadow-md overflow-hidden border border-gray-200 hover:scale-105 transform transition-all duration-300 relative">
       <Link
         to={`/view-trip/${trip?.id}`}
         className="text-black hover:text-black"
       >
-        <img
-          src={photoUrl}
-          className="w-full h-[200px] object-cover rounded-t-xl"
-          alt={trip?.userSelection?.location}
-        />
+        {loading ? (
+          <div className="w-full h-[200px] bg-gray-200 animate-pulse rounded-t-xl" />
+        ) : (
+          <img
+            src={photoUrl}
+            onLoad={() => setLoading(false)}
+            className="w-full h-[200px] object-cover rounded-t-xl"
+            alt={trip?.userSelection?.location}
+          />
+        )}
       </Link>
       <div className="p-3">
         <h2 className="font-bold text-lg">{trip?.userSelection?.location}</h2>
