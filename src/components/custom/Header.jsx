@@ -22,6 +22,7 @@ function Header() {
   const [openDialog, setOpenDialog] = useState(false);
   const [user, setUser] = useState(null);
 
+  // Load user from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -29,9 +30,10 @@ function Header() {
     }
   }, []);
 
-  const GetUserProfile = (tokenInfo) => {
-    axios
-      .get(
+  // Fetch user profile from Google using access token
+  const getUserProfile = async (tokenInfo) => {
+    try {
+      const { data } = await axios.get(
         `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokenInfo?.access_token}`,
         {
           headers: {
@@ -39,27 +41,29 @@ function Header() {
             Accept: "application/json",
           },
         }
-      )
-      .then((resp) => {
-        localStorage.setItem("user", JSON.stringify(resp.data));
-        setUser(resp.data);
-        setOpenDialog(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching profile:", err);
-      });
+      );
+
+      localStorage.setItem("user", JSON.stringify(data));
+      setUser(data);
+      setOpenDialog(false);
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+    }
   };
 
+  // Google login hook
   const login = useGoogleLogin({
-    onSuccess: (codeResp) => GetUserProfile(codeResp),
-    onError: (error) => console.log(error),
+    onSuccess: (response) => getUserProfile(response),
+    onError: (error) => console.error("Login Failed:", error),
+    scope: "profile email",
   });
 
+  // Logout and clear data
   const handleLogout = () => {
     googleLogout();
     localStorage.clear();
     setUser(null);
-    location.href = "/";
+    window.location.href = "/";
   };
 
   return (
@@ -67,6 +71,7 @@ function Header() {
       <a href="/" className="hover:cursor-pointer">
         <img className="head-logo" src="/guidemeai.png" alt="Logo" />
       </a>
+
       <div>
         {user ? (
           <div className="flex items-center gap-3">
@@ -80,10 +85,12 @@ function Header() {
                 My Trips
               </Button>
             </a>
+
+            {/* Profile Popover */}
             <Popover>
               <PopoverTrigger className="bg-white border-none">
                 <img
-                  src={user?.picture || "/guidemeai.png"}
+                  src={user.picture || "/guidemeai.png"}
                   onError={(e) => {
                     e.currentTarget.src = "/guidemeai.png";
                   }}
@@ -106,12 +113,13 @@ function Header() {
         )}
       </div>
 
+      {/* Dialog for Google Sign In */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogDescription>
               <div className="flex justify-between items-center">
-                <img src="/guidemeai.png" alt="" className="head-logo" />
+                <img src="/guidemeai.png" alt="Logo" className="head-logo" />
                 <Button
                   className="h-10 w-10"
                   onClick={() => setOpenDialog(false)}
