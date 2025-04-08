@@ -12,18 +12,42 @@ function HotelCard({ hotel }) {
     }
   }, [hotel]);
 
+  // const GetPlacePhoto = async () => {
+  //     const data = {
+  //       textQuery: hotel.hotelName,
+  //     };
+  //     await GetPlaceDetails(data).then((resp) => {
+  //       const PhotoUrl = PHOTO_REF_URL.replace(
+  //         "{NAME}",
+  //         resp.data.places[0].photos[1].name
+  //       );
+  //       setPhotoUrl(PhotoUrl);
+  //     });
+  //   };
+
   const GetPlacePhoto = async () => {
+    try {
       const data = {
         textQuery: hotel.hotelName,
       };
-      await GetPlaceDetails(data).then((resp) => {
-        const PhotoUrl = PHOTO_REF_URL.replace(
-          "{NAME}",
-          resp.data.places[0].photos[1].name
-        );
-        setPhotoUrl(PhotoUrl);
-      });
-    };
+      const resp = await GetPlaceDetails(data);
+
+      const place = resp?.data?.places?.[0];
+      const photos = place?.photos;
+
+      if (photos && photos.length > 0) {
+        const photoName = photos[1]?.name || photos[0].name;
+        const photoUrl = PHOTO_REF_URL.replace("{NAME}", photoName);
+        setPhotoUrl(photoUrl);
+      } else {
+        setPhotoUrl("/src/assets/place.jpeg");
+        console.warn("No photos available for this hotel");
+      }
+    } catch (error) {
+      console.error("Error fetching place details:", error);
+    }
+  };
+
 
   return (
     <Link
