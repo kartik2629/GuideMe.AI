@@ -1,6 +1,32 @@
+import { useEffect, useState } from "react";
+import { FaArrowUp } from "react-icons/fa";
+
 function TermsOfService() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", toggleVisibility);
+
+    return () => window.removeEventListener("scroll", toggleVisibility);
+  }, []);
+
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12 my-10 rounded-xl backdrop-blur-sm bg-white/30 shadow-lg">
+    <div className="max-w-4xl mx-auto px-6 py-12 my-10 rounded-xl backdrop-blur-sm bg-white/40 shadow-lg relative">
       <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center text-gray-800">
         Terms of Service
       </h1>
@@ -69,6 +95,17 @@ function TermsOfService() {
       <p className="mt-8 text-sm text-gray-600 text-center">
         Last updated on {new Date().toLocaleDateString()}.
       </p>
+
+      {isVisible && (
+        <div
+          className="fixed bottom-8 right-8 cursor-pointer z-50"
+          onClick={scrollToTop}
+        >
+          <div className="bg-gray-300 rounded-full shadow-md p-2 hover:bg-gray-400">
+            <FaArrowUp className="text-black" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

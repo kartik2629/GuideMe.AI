@@ -1,10 +1,10 @@
+// src/components/custom/Footer.jsx
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 
 function Footer() {
   return (
     <footer className="">
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        {/* Company Information */}
         <div className="text-center md:text-left">
           <h2 className="text-xl font-semibold">🌍 GuideMe.AI</h2>
           <h3 className="text-lg">AI Trips and Itinerary Planner</h3>
@@ -13,7 +13,6 @@ function Footer() {
           </p>
         </div>
 
-        {/* Navigation Links */}
         <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
           <a href="/about" className="hover:text-black">
             About
@@ -32,7 +31,6 @@ function Footer() {
           </a>
         </div>
 
-        {/* Social Media Icons */}
         <div className="flex gap-4 text-lg">
           <a
             href="https://github.com/kartik2629"
@@ -53,7 +51,6 @@ function Footer() {
         </div>
       </div>
 
-      {/* Legal Disclaimer */}
       <div className="text-center py-4 border-t text-xs text-gray-400">
         © {new Date().getFullYear()} Kartik Gupta • All rights reserved.
       </div>

@@ -1,3 +1,4 @@
+// src/components/custom/Layout.jsx
 import { useEffect } from "react";
 
 const Layout = ({ children }) => {

@@ -1,3 +1,4 @@
+// src/components/custom/Services.jsx
 import {
   FaMapMarkedAlt,
   FaRobot,
@@ -34,7 +35,7 @@ const services = [
 
 function Services() {
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16 my-10">
+    <div className="max-w-6xl mx-auto px-6 py-16 my-10 backdrop-blur-md bg-white/40 rounded-xl shadow-lg">
       <h1 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
         Our Services
       </h1>
@@ -43,7 +44,7 @@ function Services() {
         {services.map((service, index) => (
           <div
             key={index}
-            className="backdrop-blur-md bg-white/30 rounded-xl shadow-md p-6 hover:scale-[1.02] transition-transform duration-300"
+            className="backdrop-blur-md bg-white/80 rounded-xl shadow-md p-6 hover:scale-[1.02] transition-transform duration-300"
           >
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 rounded-full bg-white shadow-inner">

@@ -1,9 +1,34 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { FaArrowUp } from "react-icons/fa";
 
 function Policy() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", toggleVisibility);
+
+    return () => window.removeEventListener("scroll", toggleVisibility);
+  }, []);
+
   return (
-    <div className="min-h-screen px-4 py-10 md:px-16 lg:px-36 bg-white text-gray-800">
-      <Card className="shadow-lg rounded-2xl bg-gray-50">
+    <div className="min-h-screen px-4 py-10 md:px-16 lg:px-36 bg-white/40 backdrop-blur-md text-gray-800 relative">
+      <Card className="shadow-lg rounded-2xl bg-gray-50/80 backdrop-blur-sm">
         <CardContent className="p-8 space-y-6">
           <h1 className="text-3xl font-bold text-gray-900">Privacy Policy</h1>
 
@@ -28,7 +53,8 @@ function Policy() {
               personalize your experience.
             </li>
             <li>
-              <strong>Usage Data:</strong> We collect analytics data to improve the app's performance and features.
+              <strong>Usage Data:</strong> We collect analytics data to improve
+              the app&apos;s performance and features.
             </li>
           </ul>
 
@@ -96,6 +122,17 @@ function Policy() {
           </p>
         </CardContent>
       </Card>
+
+      {isVisible && (
+        <div
+          className="fixed bottom-8 right-8 cursor-pointer z-50"
+          onClick={scrollToTop}
+        >
+          <div className="bg-gray-300 rounded-full shadow-md p-2 hover:bg-gray-400">
+            <FaArrowUp className="text-black" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import emailjs from "@emailjs/browser";
 import { motion } from "framer-motion";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
+import { FaArrowUp } from "react-icons/fa";
 
 function Contact() {
   const formRef = useRef();
@@ -30,10 +31,33 @@ function Contact() {
         }
       );
   };
+  const [isVisible, setIsVisible] = useState(false); // Line 11: Added isVisible state
+
+  const scrollToTop = () => {
+    // Line 13: Added scrollToTop function
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", toggleVisibility);
+
+    return () => window.removeEventListener("scroll", toggleVisibility);
+  }, []);
 
   return (
     <motion.div
-      className="max-w-3xl mx-auto mt-10 bg-white p-8 shadow-lg rounded-2xl"
+      className="max-w-3xl mx-auto mt-10 bg-white p-8 shadow-lg rounded-2xl backdrop-blur-md bg-white/40"
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
@@ -52,6 +76,16 @@ function Contact() {
           </p>
         )}
       </form>
+      {isVisible && ( // Line 64: Added scroll to top button
+        <div
+          className="fixed bottom-8 right-8 cursor-pointer z-50"
+          onClick={scrollToTop}
+        >
+          <div className="bg-gray-300 rounded-full shadow-md p-2 hover:bg-gray-400">
+            <FaArrowUp className="text-black" />
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

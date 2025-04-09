@@ -1,3 +1,4 @@
+// src/components/custom/Header.jsx
 import "../../../public/a.css";
 import { Button } from "../ui/button";
 import { LuLogOut } from "react-icons/lu";
@@ -22,7 +23,6 @@ function Header() {
   const [openDialog, setOpenDialog] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Load user from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -30,7 +30,6 @@ function Header() {
     }
   }, []);
 
-  // Fetch user profile from Google using access token
   const getUserProfile = async (tokenInfo) => {
     try {
       const { data } = await axios.get(
@@ -51,14 +50,12 @@ function Header() {
     }
   };
 
-  // Google login hook
   const login = useGoogleLogin({
     onSuccess: (response) => getUserProfile(response),
     onError: (error) => console.error("Login Failed:", error),
     scope: "profile email",
   });
 
-  // Logout and clear data
   const handleLogout = () => {
     googleLogout();
     localStorage.clear();
@@ -75,7 +72,6 @@ function Header() {
       <div>
         {user ? (
           <div className="flex items-center gap-3">
-            
             <a href="/create-trip">
               <Button variant="outline" className="text-black rounded-full">
                 + Create Trip
@@ -113,7 +109,6 @@ function Header() {
         )}
       </div>
 
-      {/* Dialog for Google Sign In */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>

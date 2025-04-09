@@ -1,3 +1,4 @@
+// src/components/custom/Hero.jsx
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
@@ -64,7 +65,7 @@ function Hero() {
 
       <Link to="/create-trip">
         <Button className="bg-black border-slate-500 text-[#dad2b3] hover:bg-[#d8d8d8] hover:text-[#2f2c12] transition-all duration-600">
-          Get Started, It's Free
+          Get Started, It&apos;s Free
         </Button>
       </Link>
 
@@ -76,7 +77,7 @@ function Hero() {
           {testimonials.map((item, index) => (
             <div
               key={index}
-              className="bg-[#f7f4e8] min-w-[300px] sm:min-w-[350px] md:min-w-[400px] p-6 rounded-xl shadow-lg flex-shrink-0"
+              className="bg-[#f7f4e8] min-w-[300px] sm:min-w-[350px] md:min-w-[400px] p-6 rounded-xl shadow-lg flex-shrink-0 backdrop-blur-sm bg-white/40"
             >
               <p className="italic text-gray-700 text-base sm:text-lg mb-2">
                 “{item.text}”
