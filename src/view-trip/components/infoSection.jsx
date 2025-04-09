@@ -8,9 +8,12 @@ const PHOTO_REF_URL =
 
 function InfoSection({ trip }) {
   const [photoUrl, setPhotoUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    trip && GetPlacePhoto();
+    if (trip) {
+      GetPlacePhoto();
+    }
   }, [trip]);
 
   const GetPlacePhoto = async () => {
@@ -18,6 +21,7 @@ function InfoSection({ trip }) {
       !trip?.userSelection?.location?.label &&
       !trip?.userSelection?.location
     ) {
+      setLoading(false);
       return;
     }
 
@@ -33,7 +37,7 @@ function InfoSection({ trip }) {
         resp?.data?.places &&
         resp.data.places.length > 0 &&
         resp.data.places[0]?.photos &&
-        resp.data.places[0].photos.length > 3
+        resp.data.places[0].photos.length > 0
       ) {
         const PhotoUrl = PHOTO_REF_URL.replace(
           "{NAME}",
@@ -41,25 +45,35 @@ function InfoSection({ trip }) {
         );
         setPhotoUrl(PhotoUrl);
       } else {
-        setPhotoUrl(null);
+        setPhotoUrl("/placeholder-image.jpg");
       }
     } catch (error) {
       console.error("Error fetching place details:", error);
-      setPhotoUrl(null);
+      setPhotoUrl("/placeholder-image.jpg");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="mb-6">
-      <img
-        src={photoUrl || "/placeholder-image.jpg"} 
-        className="h-64 w-full object-cover rounded-xl"
-        alt={
-          trip?.userSelection?.location?.label ||
-          trip?.userSelection?.location ||
-          "Destination"
-        }
-      />
+      <div className="relative w-full h-64 rounded-xl overflow-hidden">
+        {loading ? (
+          <div className="animate-pulse bg-gray-300 w-full h-full rounded-xl" />
+        ) : (
+          <img
+            src={photoUrl || "/placeholder-image.jpg"}
+            className="h-full w-full object-cover rounded-xl transition-opacity duration-300"
+            alt={
+              trip?.userSelection?.location?.label ||
+              trip?.userSelection?.location ||
+              "Destination"
+            }
+            style={{ opacity: loading ? 0 : 1 }}
+            onLoad={() => setLoading(false)}
+          />
+        )}
+      </div>
       <div className="mt-4 flex justify-between items-center">
         <div className="flex flex-col gap-2">
           <h2 className="font-bold text-xl md:text-2xl">
@@ -90,7 +104,7 @@ function InfoSection({ trip }) {
 InfoSection.propTypes = {
   trip: PropTypes.shape({
     userSelection: PropTypes.shape({
-      location: PropTypes.oneOfType([PropTypes.string, PropTypes.object]), // Allow string or object
+      location: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
       numberOfDays: PropTypes.string,
       budget: PropTypes.string,
       numberOfPeople: PropTypes.string,

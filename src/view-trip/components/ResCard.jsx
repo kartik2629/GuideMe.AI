@@ -6,6 +6,7 @@ import defaultImage from "/src/assets/place.jpeg";
 
 function ResCard({ restaurant, index }) {
   const [photoUrl, setPhotoUrl] = useState();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (restaurant) {
@@ -18,8 +19,9 @@ function ResCard({ restaurant, index }) {
       textQuery: restaurant.name,
     };
     try {
+      setLoading(true);
       const resp = await GetPlaceDetails(data);
-      if (resp?.data?.places?.[0]?.photos?.[2]?.name) {
+      if (resp?.data?.places?.[0]?.photos?.[1]?.name) {
         const PhotoUrl = PHOTO_REF_URL.replace(
           "{NAME}",
           resp.data.places[0].photos[1].name
@@ -31,6 +33,8 @@ function ResCard({ restaurant, index }) {
     } catch (error) {
       console.error("Error fetching restaurant photo:", error);
       setPhotoUrl(defaultImage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,12 +49,20 @@ function ResCard({ restaurant, index }) {
       className="block text-inherit"
     >
       <div className="hover:scale-105 transition-all cursor-pointer shadow-md rounded-md h-full flex flex-col">
-        <img
-          src={photoUrl || defaultImage}
-          className="rounded-t-md h-40 w-full object-cover"
-          onError={(e) => (e.target.src = defaultImage)} // Fallback if image fails to load
-          alt={restaurant.name}
-        />
+        <div className="relative h-40 w-full rounded-t-md overflow-hidden">
+          {loading ? (
+            <div className="animate-pulse bg-gray-300 w-full h-full rounded-t-md" />
+          ) : (
+            <img
+              src={photoUrl || defaultImage}
+              className="rounded-t-md h-full w-full object-cover transition-opacity duration-300"
+              onError={(e) => (e.target.src = defaultImage)} // Fallback if image fails to load
+              alt={restaurant.name}
+              style={{ opacity: loading ? 0 : 1 }}
+              onLoad={() => setLoading(false)}
+            />
+          )}
+        </div>
         <div className="p-3 flex-grow">
           <h2 className="font-medium text-black text-lg">{restaurant.name}</h2>
           <div className="flex items-center gap-1 text-sm text-gray-600">

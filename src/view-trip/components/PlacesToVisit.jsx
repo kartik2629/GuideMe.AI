@@ -76,16 +76,20 @@ function PlaceCard({ place }) {
         className="block text-inherit"
       >
         <div className="hover:scale-105 transition-all cursor-pointer shadow-md rounded-md h-full flex flex-col sm:flex-row">
-          {loading ? (
-            <div className="h-40 w-full sm:w-64 bg-gray-300 animate-pulse rounded-t-md sm:rounded-l-md sm:rounded-r-none" />
-          ) : (
-            <img
-              src={photoUrl || "/src/assets/place.jpeg"}
-              alt={place.placeName}
-              className="rounded-t-md sm:rounded-l-md sm:rounded-r-none h-40 w-full sm:w-64 object-cover"
-              loading="lazy"
-            />
-          )}
+          <div className="relative h-40 w-full sm:w-64 rounded-t-md sm:rounded-l-md sm:rounded-r-none overflow-hidden">
+            {loading ? (
+              <div className="animate-pulse bg-gray-300 w-full h-full rounded-t-md sm:rounded-l-md sm:rounded-r-none" />
+            ) : (
+              <img
+                src={photoUrl || "/src/assets/place.jpeg"}
+                alt={place.placeName}
+                className="h-full w-full object-cover rounded-t-md sm:rounded-l-md sm:rounded-r-none transition-opacity duration-300"
+                loading="lazy"
+                style={{ opacity: loading ? 0 : 1 }}
+                onLoad={() => setLoading(false)}
+              />
+            )}
+          </div>
           <div className="p-3 flex-grow">
             <h2 className="font-medium text-black text-lg">
               {place.placeName}
