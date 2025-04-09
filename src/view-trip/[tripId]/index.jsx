@@ -14,6 +14,7 @@ import PlacesToVisit from "../components/PlacesToVisit";
 function Viewtrip() {
   const { tripId } = useParams();
   const [trip, setTrip] = useState(null); // Default state to null for better error handling
+  
 
   useEffect(() => {
     if (tripId) {
