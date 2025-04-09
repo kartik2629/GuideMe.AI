@@ -17,50 +17,53 @@ function ResCard({ restaurant, index }) {
     const data = {
       textQuery: restaurant.name,
     };
-    await GetPlaceDetails(data).then((resp) => {
-      const PhotoUrl = PHOTO_REF_URL.replace(
-        "{NAME}",
-        resp.data.places[0].photos[2].name
-      );
-      setPhotoUrl(PhotoUrl);
-    });
+    try {
+      const resp = await GetPlaceDetails(data);
+      if (resp?.data?.places?.[0]?.photos?.[2]?.name) {
+        const PhotoUrl = PHOTO_REF_URL.replace(
+          "{NAME}",
+          resp.data.places[0].photos[1].name
+        );
+        setPhotoUrl(PhotoUrl);
+      } else {
+        setPhotoUrl(defaultImage);
+      }
+    } catch (error) {
+      console.error("Error fetching restaurant photo:", error);
+      setPhotoUrl(defaultImage);
+    }
   };
 
   return (
     <Link
       key={index}
-      to={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      to={`https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(
         restaurant.name
       )}+${encodeURIComponent(restaurant.location)}`}
       target="_blank"
       rel="noopener noreferrer"
       className="block text-inherit"
     >
-      <div className="hover:scale-105 transition-all cursor-pointer shadow-xl rounded-md h-full">
+      <div className="hover:scale-105 transition-all cursor-pointer shadow-md rounded-md h-full flex flex-col">
         <img
-          src={photoUrl}
-          className="rounded-lg h-56 w-96 object-cover"
+          src={photoUrl || defaultImage}
+          className="rounded-t-md h-40 w-full object-cover"
           onError={(e) => (e.target.src = defaultImage)} // Fallback if image fails to load
           alt={restaurant.name}
         />
-        <div className="my-2 mx-2">
-          <h2 className="font-medium text-black">{restaurant.name}</h2>
-          <div className="flex items-center gap-2">
-            📍
-            <h2 className="font-medium text-black">{restaurant.location}</h2>
+        <div className="p-3 flex-grow">
+          <h2 className="font-medium text-black text-lg">{restaurant.name}</h2>
+          <div className="flex items-center gap-1 text-sm text-gray-600">
+            📍 <span>{restaurant.location}</span>
           </div>
-          <div className="flex flex-col justify-between">
-            <div className="flex items-center gap-2">
-              💸
-              <h2 className="font-small text-sm text-gray-600">
-                {restaurant.priceRange}
-              </h2>
+          <div className="flex flex-col justify-between mt-2 text-sm text-gray-600">
+            <div className="flex items-center gap-1">
+              💸 <span>{restaurant.priceRange}</span>
             </div>
-
-            <h2 className="font-small text-sm text-gray-600">
-              🍽 {restaurant.cuisine}
+            <h2 className="flex items-center gap-1">
+              🍽 <span>{restaurant.cuisine}</span>
             </h2>
-            <p className="text-sm text-gray-500">{restaurant.description}</p>
+            <p className="text-gray-500 mt-1">{restaurant.description}</p>
           </div>
         </div>
       </div>

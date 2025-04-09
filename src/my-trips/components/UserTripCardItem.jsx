@@ -103,7 +103,6 @@
 
 // // export default UserTripCardItem;
 
-
 // import { GetPlaceDetails } from "@/service/GlobalAPI";
 // import { useEffect, useState } from "react";
 // import { Link } from "react-router-dom";
@@ -218,7 +217,6 @@
 
 // export default UserTripCardItem;
 
-
 import { GetPlaceDetails } from "@/service/GlobalAPI";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -246,7 +244,9 @@ function UserTripCardItem({ trip, onDelete }) {
       const locationQuery =
         typeof trip?.userSelection?.location === "object" &&
         trip?.userSelection?.location !== null &&
-        "label" in trip?.userSelection?.location
+        trip?.userSelection?.location &&
+        typeof trip.userSelection.location === "object" &&
+        "label" in trip.userSelection.location
           ? trip.userSelection.location.label
           : trip?.userSelection?.location;
 

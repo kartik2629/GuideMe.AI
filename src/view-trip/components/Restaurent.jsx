@@ -4,9 +4,9 @@ import ResCard from "./ResCard";
 
 function Restaurent({ trip }) {
   return (
-    <div>
-      <h2 className="font-bold text-xl mt-5">Restaurants Recommendation</h2>
-      <div className="grid grid-cols-2 gap-5 mt-5 md:grid-cols-2 lg:grid-cols-3 sm:grid-cols-1">
+    <div className="mt-6">
+      <h2 className="font-bold text-xl mb-3">Restaurants Recommendation</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {trip?.tripData?.tripData?.contextualRecommendations?.restaurants?.map(
           (restaurant, index) => (
             <ResCard key={index} restaurant={restaurant} />

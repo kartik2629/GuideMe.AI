@@ -12,19 +12,6 @@ function HotelCard({ hotel }) {
     }
   }, [hotel]);
 
-  // const GetPlacePhoto = async () => {
-  //     const data = {
-  //       textQuery: hotel.hotelName,
-  //     };
-  //     await GetPlaceDetails(data).then((resp) => {
-  //       const PhotoUrl = PHOTO_REF_URL.replace(
-  //         "{NAME}",
-  //         resp.data.places[0].photos[1].name
-  //       );
-  //       setPhotoUrl(PhotoUrl);
-  //     });
-  //   };
-
   const GetPlacePhoto = async () => {
     try {
       const data = {
@@ -48,34 +35,30 @@ function HotelCard({ hotel }) {
     }
   };
 
-
   return (
     <Link
-      to={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      to={`https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(
         hotel.hotelName
       )}+${encodeURIComponent(hotel.hotelAddress)}`}
       target="_blank"
       rel="noopener noreferrer"
       className="block text-inherit"
     >
-      <div className="hover:scale-105 transition-all cursor-pointer shadow-xl rounded-md h-full">
+      <div className="hover:scale-105 transition-all cursor-pointer shadow-md rounded-md h-full">
         <img
           src={photoUrl}
-          className="rounded-lg h-56 w-96 object-cover"
+          className="rounded-t-md h-40 w-full object-cover"
           onError={(e) => (e.target.src = "/src/assets/place.jpeg")}
           alt={hotel.hotelName}
         />
-        <div className="my-2 mx-2">
-          <h2 className="font-medium text-black">{hotel.hotelName}</h2>
-          <div className="flex items-center gap-2">
-            📍 <h2 className="font-medium text-black">{hotel.hotelAddress}</h2>
+        <div className="p-3">
+          <h2 className="font-medium text-black text-lg">{hotel.hotelName}</h2>
+          <div className="flex items-center gap-1 text-sm text-gray-600">
+            📍 <span>{hotel.hotelAddress}</span>
           </div>
-          <div className="flex flex-col justify-between">
-            <div className="flex items-center gap-2">
-              💸{" "}
-              <h2 className="font-small text-sm text-gray-600">
-                {hotel.price}
-              </h2>
+          <div className="flex flex-col justify-between mt-2">
+            <div className="flex items-center gap-1 text-sm text-gray-600">
+              💸 <span>{hotel.price}</span>
             </div>
             <h2 className="font-small text-sm text-gray-600">
               ⭐ {hotel.rating} stars

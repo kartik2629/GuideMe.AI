@@ -12,21 +12,21 @@ function PlacesToVisit({ trip }) {
     Object.keys(itinerary).length === 0
   ) {
     return (
-      <p className="text-gray-500 text-center mt-5">No itinerary available.</p>
+      <p className="text-gray-500 text-center mt-6">No itinerary available.</p>
     );
   }
 
   return (
-    <div>
-      <h2 className="font-bold text-xl mt-5">Day Wise Itinerary</h2>
+    <div className="mt-6">
+      <h2 className="font-bold text-xl mb-3">Day Wise Itinerary</h2>
       {Object.entries(itinerary)
         .sort(([dayA], [dayB]) => dayA.localeCompare(dayB))
         .map(([dayKey, day], index) => (
-          <div key={dayKey} className="mt-5">
-            <h2 className="font-medium text-lg">
+          <div key={dayKey} className="mt-4">
+            <h2 className="font-medium text-lg mb-2">
               Day {index + 1} : {day.theme}
             </h2>
-            <div className="grid grid-cols-1 gap-5 mt-5">
+            <div className="grid grid-cols-1 gap-4">
               {Array.isArray(day.places) &&
                 day.places.map((place, placeIndex) => (
                   <PlaceCard key={placeIndex} place={place} />
@@ -68,42 +68,54 @@ function PlaceCard({ place }) {
   return (
     <div className="block text-inherit">
       <Link
-        to={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        to={`https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(
           place.placeName
         )}+${encodeURIComponent(place.placeName)}`}
         target="_blank"
         rel="noopener noreferrer"
         className="block text-inherit"
       >
-        <div className="hover:scale-105 transition-all cursor-pointer shadow-xl rounded-md h-full flex">
+        <div className="hover:scale-105 transition-all cursor-pointer shadow-md rounded-md h-full flex flex-col sm:flex-row">
           {loading ? (
-            <div className="h-40 w-64 bg-gray-300 animate-pulse rounded-lg" />
+            <div className="h-40 w-full sm:w-64 bg-gray-300 animate-pulse rounded-t-md sm:rounded-l-md sm:rounded-r-none" />
           ) : (
             <img
               src={photoUrl || "/src/assets/place.jpeg"}
               alt={place.placeName}
-              className="rounded-lg h-40 w-64 object-cover"
+              className="rounded-t-md sm:rounded-l-md sm:rounded-r-none h-40 w-full sm:w-64 object-cover"
               loading="lazy"
             />
           )}
-          <div className="my-2 mx-2">
-            <h2 className="font-medium text-black">{place.placeName}</h2>
-            <p className="text-gray-600 text-sm">{place.details}</p>
-            <div className="flex flex-col gap-1 mt-2">
+          <div className="p-3 flex-grow">
+            <h2 className="font-medium text-black text-lg">
+              {place.placeName}
+            </h2>
+            <p className="text-gray-600 text-sm mb-2">{place.details}</p>
+            <div className="flex flex-col gap-1 text-sm text-gray-700">
               {place.address && (
-                <p className="text-gray-700">📍 {place.address}</p>
+                <p className="flex items-center gap-1">
+                  📍 <span>{place.address}</span>
+                </p>
               )}
               {place.ticketPricing && (
-                <p className="text-gray-700">🎟 {place.ticketPricing}</p>
+                <p className="flex items-center gap-1">
+                  🎟 <span>{place.ticketPricing}</span>
+                </p>
               )}
               {place.travelTime && (
-                <p className="text-gray-700">🕒 {place.travelTime}</p>
+                <p className="flex items-center gap-1">
+                  🕒 <span>{place.travelTime}</span>
+                </p>
               )}
               {place.bestTimeToVisit && (
-                <p className="text-gray-700">⏰ {place.bestTimeToVisit}</p>
+                <p className="flex items-center gap-1">
+                  ⏰ <span>{place.bestTimeToVisit}</span>
+                </p>
               )}
               {place.contact && (
-                <p className="text-gray-700">📞 {place.contact}</p>
+                <p className="flex items-center gap-1">
+                  📞 <span>{place.contact}</span>
+                </p>
               )}
             </div>
           </div>
