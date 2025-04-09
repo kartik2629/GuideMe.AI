@@ -1,4 +1,3 @@
-// src/components/custom/Hero.jsx
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
@@ -22,6 +21,22 @@ function Hero() {
     {
       text: "Super intuitive and easy to use. My travel life is now 10x better!",
       author: "Sneha K., Pune",
+    },
+    {
+      text: "Finally, a travel planner that understands exactly what I'm looking for!",
+      author: "Priya J., Kolkata",
+    },
+    {
+      text: "The recommendations for local restaurants were spot on. Made my trip!",
+      author: "Vikram R., Chennai",
+    },
+    {
+      text: "I loved how I could tweak the itinerary based on my spontaneous decisions.",
+      author: "Ananya B., Hyderabad",
+    },
+    {
+      text: "This platform saved me so much stress. My family vacation was perfect!",
+      author: "Suresh K., Kochi",
     },
   ];
 
@@ -77,12 +92,14 @@ function Hero() {
           {testimonials.map((item, index) => (
             <div
               key={index}
-              className="bg-[#f7f4e8] min-w-[300px] sm:min-w-[350px] md:min-w-[400px] p-6 rounded-xl shadow-lg flex-shrink-0 backdrop-blur-sm bg-white/40"
+              className="bg-[#f7f4e8] min-w-[300px] sm:min-w-[320px] md:min-w-[350px] h-[150px] p-6 rounded-xl shadow-lg flex-shrink-0 backdrop-blur-sm bg-white/40 flex flex-col justify-between"
             >
               <p className="italic text-gray-700 text-base sm:text-lg mb-2">
                 “{item.text}”
               </p>
-              <p className="font-semibold text-[#453911]">{item.author}</p>
+              <p className="font-semibold text-[#453911] text-sm sm:text-base">
+                {item.author}
+              </p>
             </div>
           ))}
         </div>
