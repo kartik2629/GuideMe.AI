@@ -17,7 +17,6 @@ import { useEffect, useState } from "react";
 import { googleLogout, useGoogleLogin } from "@react-oauth/google";
 import { FcGoogle } from "react-icons/fc";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 function Header() {
   const [openDialog, setOpenDialog] = useState(false);
