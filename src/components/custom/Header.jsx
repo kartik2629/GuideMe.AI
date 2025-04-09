@@ -1,4 +1,4 @@
-import "../../../public/a.css";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { LuLogOut } from "react-icons/lu";
 import {
@@ -13,16 +13,15 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 
-import { useEffect, useState } from "react";
-import { googleLogout, useGoogleLogin } from "@react-oauth/google";
+import "../../../public/a.css";
 import { FcGoogle } from "react-icons/fc";
-import axios from "axios";
+
+import { auth, provider, signInWithPopup, signOut } from "../../service/firebaseConfig";
 
 function Header() {
   const [openDialog, setOpenDialog] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Load user from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -30,40 +29,32 @@ function Header() {
     }
   }, []);
 
-  // Fetch user profile from Google using access token
-  const getUserProfile = async (tokenInfo) => {
+  const loginWithGoogle = async () => {
     try {
-      const { data } = await axios.get(
-        `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokenInfo?.access_token}`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenInfo?.access_token}`,
-            Accept: "application/json",
-          },
-        }
-      );
-
-      localStorage.setItem("user", JSON.stringify(data));
-      setUser(data);
+      const result = await signInWithPopup(auth, provider);
+      const userData = result.user;
+      const formattedUser = {
+        name: userData.displayName,
+        email: userData.email,
+        picture: userData.photoURL,
+      };
+      localStorage.setItem("user", JSON.stringify(formattedUser));
+      setUser(formattedUser);
       setOpenDialog(false);
-    } catch (err) {
-      console.error("Error fetching profile:", err);
+    } catch (error) {
+      console.error("Firebase login error:", error);
     }
   };
 
-  // Google login hook
-  const login = useGoogleLogin({
-    onSuccess: (response) => getUserProfile(response),
-    onError: (error) => console.error("Login Failed:", error),
-    scope: "profile email",
-  });
-
-  // Logout and clear data
-  const handleLogout = () => {
-    googleLogout();
-    localStorage.clear();
-    setUser(null);
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.clear();
+      setUser(null);
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Sign-out error:", error);
+    }
   };
 
   return (
@@ -85,9 +76,7 @@ function Header() {
                 My Trips
               </Button>
             </a>
-           
 
-            {/* Profile Popover */}
             <Popover>
               <PopoverTrigger className="bg-[#fff0] border-none">
                 <img
@@ -114,7 +103,6 @@ function Header() {
         )}
       </div>
 
-      {/* Dialog for Google Sign In */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
@@ -131,7 +119,7 @@ function Header() {
               <h2 className="font-bold text-lg mt-7">Sign In With Google</h2>
               <p>Sign in with Google authentication securely</p>
               <Button
-                onClick={login}
+                onClick={loginWithGoogle}
                 className="mt-5 w-full flex gap-4 items-center"
               >
                 <FcGoogle className="h-7 w-7" />

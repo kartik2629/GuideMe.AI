@@ -34,7 +34,6 @@ function Hero() {
           behavior: "smooth",
         });
 
-        // If at end, scroll back to start
         if (
           container.scrollLeft + container.offsetWidth >=
           container.scrollWidth - 5
@@ -69,7 +68,6 @@ function Hero() {
         </Button>
       </Link>
 
-      {/* Horizontal Scroll Testimonials */}
       <div
         ref={scrollRef}
         className="w-full overflow-x-auto mt-12 whitespace-nowrap scroll-smooth no-scrollbar"

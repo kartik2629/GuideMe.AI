@@ -15,8 +15,7 @@ const Layout = ({ children }) => {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-sky-300 via-yellow-100 to-lime-200 overflow-hidden animate-backgroundShift">
-      {/* Floating objects */}
+    <div className="relative min-h-screen bg-gradient-to-br from-sky-200 via-yellow-100 to-lime-50 overflow-hidden animate-backgroundShift">
       <div className="absolute inset-0 z-0 pointer-events-none">
         {Array.from({ length: 10 }).map((_, i) => (
           <span
