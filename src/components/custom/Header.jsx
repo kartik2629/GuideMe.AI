@@ -1,7 +1,150 @@
-// src/components/custom/Header.jsx
+// // src/components/custom/Header.jsx
+// import "../../../public/a.css";
+// import { Button } from "../ui/button";
+// import { LuLogOut } from "react-icons/lu";
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogHeader,
+// } from "@/components/ui/dialog";
+
+// import { useEffect, useState } from "react";
+// import { googleLogout, useGoogleLogin } from "@react-oauth/google";
+// import { FcGoogle } from "react-icons/fc";
+// import axios from "axios";
+
+// function Header() {
+//   const [openDialog, setOpenDialog] = useState(false);
+//   const [user, setUser] = useState(null);
+
+//   useEffect(() => {
+//     const storedUser = localStorage.getItem("user");
+//     if (storedUser) {
+//       setUser(JSON.parse(storedUser));
+//     }
+//   }, []);
+
+//   const getUserProfile = async (tokenInfo) => {
+//     try {
+//       const { data } = await axios.get(
+//         `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokenInfo?.access_token}`,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${tokenInfo?.access_token}`,
+//             Accept: "application/json",
+//           },
+//         }
+//       );
+
+//       localStorage.setItem("user", JSON.stringify(data));
+//       setUser(data);
+//       setOpenDialog(false);
+//     } catch (err) {
+//       console.error("Error fetching profile:", err);
+//     }
+//   };
+
+//   const login = useGoogleLogin({
+//     onSuccess: (response) => getUserProfile(response),
+//     onError: (error) => console.error("Login Failed:", error),
+//     scope: "profile email",
+//   });
+
+//   const handleLogout = () => {
+//     googleLogout();
+//     localStorage.clear();
+//     setUser(null);
+//     window.location.href = "/";
+//   };
+
+//   return (
+//     <div className="p-3 shadow-md flex justify-between items-center px-5 rounded-b-xl bg-gradient-to-r from-sky-200 via-yellow-100 to-lime-200 backdrop-blur-sm bg-opacity-60">
+//       <a href="/" className="hover:cursor-pointer">
+//         <img className="head-logo" src="/guidemeai.png" alt="Logo" />
+//       </a>
+
+//       <div>
+//         {user ? (
+//           <div className="flex items-center gap-3">
+//             <a href="/create-trip">
+//               <Button variant="outline" className="text-black rounded-full">
+//                 + Create Trip
+//               </Button>
+//             </a>
+//             <a href="/my-trips">
+//               <Button variant="outline" className="text-black rounded-full">
+//                 My Trips
+//               </Button>
+//             </a>
+
+//             <Popover>
+//               <PopoverTrigger className="bg-[#fff0] border-none">
+//                 <img
+//                   src={user.picture || "/guidemeai.png"}
+//                   onError={(e) => {
+//                     e.currentTarget.src = "/guidemeai.png";
+//                   }}
+//                   className="h-[40px] w-[40px] rounded-full"
+//                   alt="User"
+//                 />
+//               </PopoverTrigger>
+//               <PopoverContent>
+//                 <div
+//                   onClick={handleLogout}
+//                   className="flex cursor-pointer justify-center gap-2 items-center"
+//                 >
+//                   <LuLogOut /> Logout
+//                 </div>
+//               </PopoverContent>
+//             </Popover>
+//           </div>
+//         ) : (
+//           <Button onClick={() => setOpenDialog(true)}>Sign In</Button>
+//         )}
+//       </div>
+
+//       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+//         <DialogContent>
+//           <DialogHeader>
+//             <DialogDescription>
+//               <div className="flex justify-between items-center">
+//                 <img src="/guidemeai.png" alt="Logo" className="head-logo" />
+//                 <Button
+//                   className="h-10 w-10"
+//                   onClick={() => setOpenDialog(false)}
+//                 >
+//                   X
+//                 </Button>
+//               </div>
+//               <h2 className="font-bold text-lg mt-7">Sign In With Google</h2>
+//               <p>Sign in with Google authentication securely</p>
+//               <Button
+//                 onClick={login}
+//                 className="mt-5 w-full flex gap-4 items-center"
+//               >
+//                 <FcGoogle className="h-7 w-7" />
+//                 Sign In with Google
+//               </Button>
+//             </DialogDescription>
+//           </DialogHeader>
+//         </DialogContent>
+//       </Dialog>
+//     </div>
+//   );
+// }
+
+// export default Header;
+
+
 import "../../../public/a.css";
 import { Button } from "../ui/button";
-import { LuLogOut } from "react-icons/lu";
+import { LuLogOut, LuArrowUp } from "react-icons/lu";
 import {
   Popover,
   PopoverContent,
@@ -15,56 +158,83 @@ import {
 } from "@/components/ui/dialog";
 
 import { useEffect, useState } from "react";
-import { googleLogout, useGoogleLogin } from "@react-oauth/google";
 import { FcGoogle } from "react-icons/fc";
-import axios from "axios";
+import {
+  auth,
+  provider,
+  signInWithPopup,
+  signOut,
+} from "@/service/firebaseConfig";
+import { useNavigate } from "react-router-dom";
 
 function Header() {
   const [openDialog, setOpenDialog] = useState(false);
   const [user, setUser] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", toggleVisibility);
+
+    return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
-  const getUserProfile = async (tokenInfo) => {
-    try {
-      const { data } = await axios.get(
-        `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokenInfo?.access_token}`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenInfo?.access_token}`,
-            Accept: "application/json",
-          },
-        }
-      );
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+      if (authUser) {
+        setUser(authUser);
+        localStorage.setItem("user", JSON.stringify(authUser));
+      } else {
+        setUser(null);
+        localStorage.removeItem("user");
+      }
+    });
 
-      localStorage.setItem("user", JSON.stringify(data));
-      setUser(data);
+    return () => unsubscribe();
+  }, []);
+
+  const handleSignInWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      // The user's ID token can be retrieved from result.user.getIdToken(true)
+      setUser(result.user);
+      localStorage.setItem("user", JSON.stringify(result.user));
       setOpenDialog(false);
-    } catch (err) {
-      console.error("Error fetching profile:", err);
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+      // Handle error (e.g., display a message to the user)
     }
   };
 
-  const login = useGoogleLogin({
-    onSuccess: (response) => getUserProfile(response),
-    onError: (error) => console.error("Login Failed:", error),
-    scope: "profile email",
-  });
-
-  const handleLogout = () => {
-    googleLogout();
-    localStorage.clear();
-    setUser(null);
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      localStorage.removeItem("user");
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      // Handle error
+    }
   };
 
   return (
-    <div className="p-3 shadow-md flex justify-between items-center px-5 rounded-b-xl bg-gradient-to-r from-sky-200 via-yellow-100 to-lime-200 backdrop-blur-sm bg-opacity-60">
+    <div className="p-3 shadow-md flex justify-between items-center px-5 rounded-b-xl bg-gradient-to-r from-sky-200 via-yellow-100 to-lime-200 backdrop-blur-sm bg-opacity-60 relative">
       <a href="/" className="hover:cursor-pointer">
         <img className="head-logo" src="/guidemeai.png" alt="Logo" />
       </a>
@@ -86,7 +256,7 @@ function Header() {
             <Popover>
               <PopoverTrigger className="bg-[#fff0] border-none">
                 <img
-                  src={user.picture || "/guidemeai.png"}
+                  src={user.photoURL || "/guidemeai.png"}
                   onError={(e) => {
                     e.currentTarget.src = "/guidemeai.png";
                   }}
@@ -125,7 +295,7 @@ function Header() {
               <h2 className="font-bold text-lg mt-7">Sign In With Google</h2>
               <p>Sign in with Google authentication securely</p>
               <Button
-                onClick={login}
+                onClick={handleSignInWithGoogle}
                 className="mt-5 w-full flex gap-4 items-center"
               >
                 <FcGoogle className="h-7 w-7" />
@@ -135,6 +305,17 @@ function Header() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+
+      {isVisible && (
+        <div
+          className="fixed bottom-8 right-8 cursor-pointer z-50"
+          onClick={scrollToTop}
+        >
+          <div className="bg-gray-300 rounded-full shadow-md p-2 hover:bg-gray-400">
+            <LuArrowUp className="text-black" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
