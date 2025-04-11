@@ -544,9 +544,9 @@
 
 // export default CreateTrip;
 
-import { useEffect, useState, useRef } from "react"; // Added useRef
+import { useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-// Removed unused import: import "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   AI_PROMPT,
@@ -555,7 +555,6 @@ import {
   SelectTravelList,
 } from "@/constants/options.jsx";
 import { FcGoogle } from "react-icons/fc";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { chatSession } from "@/service/AIModel";
 import {
@@ -564,10 +563,10 @@ import {
   DialogDescription,
   DialogHeader,
 } from "@/components/ui/dialog";
-import "../../public/a.css"; // Ensure this path is correct
+import "../../public/a.css";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/service/firebaseConfig";
-import { auth, provider, signInWithPopup } from "@/service/firebaseConfig"; // Import Firebase Auth
+import { auth, provider, signInWithPopup } from "@/service/firebaseConfig";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import { useNavigate } from "react-router-dom";
 
@@ -577,7 +576,6 @@ function CreateTrip() {
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
-  const topRef = useRef(null); // Optional: Ref for more precise scrolling if needed, but window.scrollTo is simpler here
 
   const handleInputChange = (name, value) => {
     setFormData((prevData) => ({
@@ -585,9 +583,6 @@ function CreateTrip() {
       [name]: value,
     }));
   };
-
-  // Removed empty useEffect, not needed
-  // useEffect(() => {}, [formData]);
 
   const loginWithGoogle = async () => {
     try {
@@ -600,41 +595,37 @@ function CreateTrip() {
       };
       localStorage.setItem("user", JSON.stringify(formattedUser));
       setOpenDialog(false);
-      await OnGenerateTrip(); // Generate trip after successful login - added await
+      OnGenerateTrip();
     } catch (error) {
       console.error("Firebase login error:", error);
       toast.error("Failed to sign in with Google.");
-      // Ensure loading is false if login fails during trip generation attempt
-      setLoading(false);
     }
   };
 
-  const SaveAiTrip = async (TripData) => {
-    // setLoading(true) is already set in OnGenerateTrip, no need to set again unless specifically for saving
+  const SaveAiTrip = async (TripData, docId, toastId) => {
     const user = JSON.parse(localStorage.getItem("user"));
-    const docId = Date.now().toString();
-    try {
-      // Attempt to parse the TripData first to catch potential JSON errors early
-      const parsedTripData = JSON.parse(TripData);
 
+    try {
       await setDoc(doc(db, "GuideMeAi", docId), {
-        tripData: parsedTripData, // Use the parsed data
+        tripData: JSON.parse(TripData),
         userSelection: formData,
         userEmail: user?.email,
         id: docId,
       });
-      // Keep setLoading(false) here if you want the generating message to disappear *after* saving
-      // setLoading(false);
+      toast.success("Itinerary saved successfully!", { id: toastId });
+      setLoading(false);
       navigate(`/view-trip/${docId}`);
     } catch (error) {
-      console.error("Error parsing or saving trip data:", error);
-      toast.error(
-        "Failed to save the generated trip. The format might be invalid."
-      );
-      setLoading(false); // Ensure loading stops on error
+      console.error("Error saving trip data:", error);
+      if (error instanceof SyntaxError) {
+        toast.error("Failed to process AI response. Please try again.", {
+          id: toastId,
+        });
+      } else {
+        toast.error("Failed to save the generated trip.", { id: toastId });
+      }
+      setLoading(false);
     }
-    // It's generally better to set loading false *after* navigation or in a finally block if needed elsewhere
-    // setLoading(false); moved below try/catch for clarity or handled within try/catch
   };
 
   const OnGenerateTrip = async () => {
@@ -642,64 +633,57 @@ function CreateTrip() {
 
     if (!user) {
       setOpenDialog(true);
-      return; // Stop execution if user is not logged in
+      return;
     }
 
-    // Validation Check
     if (
-      !formData?.location?.label || // Ensure location object and its label exist
+      !formData?.location?.label ||
       !formData?.budget ||
       !formData?.numberOfPeople ||
       !formData?.destinationType ||
       !formData?.numberOfDays
     ) {
       toast.error("Please fill in all the travel preferences.");
-      return; // Stop execution if validation fails
+      return;
     }
 
-    // --- Modifications Start ---
-    // 1. Scroll to top
+    setLoading(true);
+    const locationName = formData.location.label;
+
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    // 2. Set loading state (which will show the "Generating..." message)
-    setLoading(true);
-    // --- Modifications End ---
+    const toastId = toast.loading(
+      `Generating itinerary for ${locationName}...`
+    );
 
-    const FINAL_PROMPT = AI_PROMPT.replace(
-      "{location}",
-      formData.location.label // Use the label directly
-    )
-      .replace("{numberOfDays}", formData.numberOfDays)
-      .replace("{travelType}", formData.travelType)
-      .replace("{budget}", formData.budget)
-      .replace("{numberOfPeople}", formData.numberOfPeople)
-      .replace("{destinationType}", formData.destinationType);
-    // No need to replace {numberOfDays} and {location} twice
-
-    console.log("Sending Prompt:", FINAL_PROMPT); // Good for debugging
+    const FINAL_PROMPT = AI_PROMPT.replace("{location}", locationName)
+      .replace("{numberOfDays}", formData?.numberOfDays)
+      .replace("{travelType}", formData?.travelType)
+      .replace("{budget}", formData?.budget)
+      .replace("{numberOfPeople}", formData?.numberOfPeople)
+      .replace("{destinationType}", formData?.destinationType);
 
     try {
       const result = await chatSession.sendMessage(FINAL_PROMPT);
       const aiResponseText = result?.response?.text();
 
       if (!aiResponseText) {
-        throw new Error("Received empty response from AI.");
+        throw new Error("Empty response from AI.");
       }
 
-      console.log("AI Response received"); // Debug log
-      // setLoading(false); // Move setLoading(false) to after SaveAiTrip or inside it
-      await SaveAiTrip(aiResponseText); // Wait for saving to complete
+      const docId = Date.now().toString();
+      SaveAiTrip(aiResponseText, docId, toastId);
     } catch (error) {
-      console.error("Error generating or processing trip:", error);
+      console.error("Error generating trip:", error);
       toast.error(
-        `Failed to generate trip: ${error.message || "Please try again."}`
+        `Failed to generate trip: ${error.message || "Please try again."}`,
+        { id: toastId }
       );
-      setLoading(false); // Ensure loading stops on error
+      setLoading(false);
     }
   };
 
   return (
-    // ref={topRef} // Optional ref added to the main div if needed
     <div className="sm:px-10 md:px-32 lg:px-56 xl:px-72 px-5 mt-10">
       <h2 className="font-bold text-3xl">
         Tell us your travel preferences 🏕️🌴
@@ -708,28 +692,7 @@ function CreateTrip() {
         Just provide some basic information, and our trip planner will generate
         customized itineraries based on your preferences
       </p>
-
-      {/* --- New Loading Message Block --- */}
-      {loading && (
-        <div className="text-center my-10 p-5 border rounded-lg shadow-lg bg-white">
-          <AiOutlineLoading3Quarters className="h-10 w-10 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-xl font-semibold text-blue-600 ">
-            Generating itinerary... Please wait.
-          </p>
-          <p className="text-gray-500 mt-2">This may take a moment.</p>
-        </div>
-      )}
-      {/* --- End New Loading Message Block --- */}
-
-      {/* Form sections - kept collapsible for readability, no functional change */}
-      <div
-        className={`mt-10 flex flex-col gap-9 ${
-          loading ? "opacity-50 pointer-events-none" : ""
-        }`}
-      >
-        {" "}
-        {/* Optionally disable form while loading */}
-        {/* Destination */}
+      <div className="mt-20 flex flex-col gap-9">
         <div>
           <h2 className="text-xl my-3 font-medium">
             What is your destination?
@@ -739,37 +702,25 @@ function CreateTrip() {
             selectProps={{
               place,
               onChange: (v) => {
-                setPlace(v); // Keep track of the selected place object
-                handleInputChange("location", v); // Store the entire object { label: '...', value: {...} }
+                setPlace(v);
+                handleInputChange("location", v);
               },
-              placeholder: "Search for a city or place...",
               styles: {
-                // Optional: Add some basic styling
                 control: (provided) => ({
                   ...provided,
-                  borderRadius: "0.5rem", // Match other inputs/buttons
-                  borderColor: "#d1d5db", // gray-300
-                }),
-                input: (provided) => ({
-                  ...provided,
-                  color: "#1f2937", // gray-800
-                }),
-                option: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isSelected
-                    ? "#3b82f6"
-                    : state.isFocused
-                    ? "#eff6ff"
-                    : "white", // blue-500, blue-50
-                  color: state.isSelected ? "white" : "#1f2937",
+                  borderRadius: "0.375rem",
+                  borderColor: "#d1d5db",
                 }),
               },
             }}
           />
-          {/* Debugging: Show selected location label */}
-          {/* {formData.location && <p className="text-sm mt-1 text-gray-600">Selected: {formData.location.label}</p>} */}
+          {formData?.location?.label && (
+            <p className="text-sm text-gray-600 mt-1">
+              Selected: {formData.location.label}
+            </p>
+          )}
         </div>
-        {/* Number of Days */}
+
         <div className="">
           <h2 className="text-xl my-3 font-medium">
             How many days are you planning your trip?
@@ -777,29 +728,27 @@ function CreateTrip() {
           <Input
             placeholder={"Ex. 3"}
             type="number"
-            min="1" // Add min validation
+            min="1"
             id="numberOfDays"
-            className="no-spinner" // Ensure your CSS for no-spinner is working
-            value={formData.numberOfDays || ""} // Control the input value
+            className="no-spinner"
             onChange={(e) => handleInputChange("numberOfDays", e.target.value)}
+            value={formData.numberOfDays || ""}
           />
         </div>
-        {/* Budget */}
+
         <div>
           <h2 className="text-xl my-3 font-medium">What is your Budget?</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 justify-between gap-5 mt-5">
-            {" "}
-            {/* Responsive columns */}
             {SelectBudgetOption.map((item, index) => (
               <div
                 key={index}
                 onClick={() => handleInputChange("budget", item.title)}
-                className={`p-4 border bg-transparent cursor-pointer rounded-lg hover:shadow-lg transition-shadow duration-200
-                  ${
-                    formData?.budget === item.title
-                      ? "shadow-lg border-black ring-2 ring-black" // Enhanced selection style
-                      : "border-gray-300"
-                  } `}
+                className={`p-4 border bg-transparent cursor-pointer rounded-lg hover:shadow-lg transition-shadow duration-200 ease-in-out
+                   ${
+                     formData?.budget === item.title
+                       ? "shadow-lg border-black ring-1 ring-black"
+                       : "border-gray-300"
+                   } `}
               >
                 <h2 className="text-4xl">{item.icon}</h2>
                 <h2 className="font-bold text-lg mt-1">{item.title}</h2>
@@ -808,51 +757,48 @@ function CreateTrip() {
             ))}
           </div>
         </div>
-        {/* Travel Companions */}
+
         <div>
           <h2 className="text-xl my-3 font-medium">
             Who do you plan on travelling with?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 justify-between gap-5 mt-5">
-            {" "}
-            {/* Responsive columns */}
             {SelectTravelList.map((item, index) => (
               <div
                 key={index}
                 onClick={() => {
                   handleInputChange("numberOfPeople", item.people);
-                  handleInputChange("travelType", item.title); // Also update travelType based on selection
+                  handleInputChange("travelType", item.title);
                 }}
-                className={`p-4 border cursor-pointer rounded-lg hover:shadow-lg transition-shadow duration-200 ${
-                  formData?.numberOfPeople === item.people // Check against numberOfPeople for consistency
-                    ? "shadow-lg border-black ring-2 ring-black" // Enhanced selection style
+                className={`p-4 border cursor-pointer rounded-lg hover:shadow-lg transition-shadow duration-200 ease-in-out ${
+                  formData?.numberOfPeople === item.people
+                    ? "shadow-lg border-black ring-1 ring-black"
                     : "border-gray-300"
                 }`}
               >
                 <h2 className="text-4xl">{item.icon}</h2>
                 <h2 className="font-bold text-lg mt-1">{item.title}</h2>
-                <h2 className="text-sm text-gray-500 mt-1">
-                  {item.desc} ({item.people})
+                <h2 className="text-sm text-gray-400 mt-1">
+                  Persons: {item.people}
                 </h2>
+                <h2 className="text-sm text-gray-500 mt-1">{item.desc}</h2>
               </div>
             ))}
           </div>
         </div>
-        {/* Destination Type */}
+
         <div>
           <h2 className="text-xl my-3 font-medium">
-            What type of activities or vibe are you looking for?
+            What type of destination do you prefer?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 justify-between gap-5 mt-5">
-            {" "}
-            {/* Responsive columns */}
             {SelectDestinationType.map((item, index) => (
               <div
                 key={index}
                 onClick={() => handleInputChange("destinationType", item.title)}
-                className={`p-4 border cursor-pointer rounded-lg hover:shadow-lg transition-shadow duration-200 ${
+                className={`p-4 border cursor-pointer rounded-lg hover:shadow-lg transition-shadow duration-200 ease-in-out ${
                   formData?.destinationType === item.title
-                    ? "shadow-lg border-black ring-2 ring-black" // Enhanced selection style
+                    ? "shadow-lg border-black ring-1 ring-black"
                     : "border-gray-300"
                 }`}
               >
@@ -864,60 +810,48 @@ function CreateTrip() {
           </div>
         </div>
       </div>
-
-      {/* Submit Button */}
       <div className="my-10 justify-center flex">
-        {/* Button is disabled by the 'loading' state already */}
-        <Button
-          onClick={OnGenerateTrip}
-          disabled={loading}
-          size="lg"
-          className="w-full sm:w-auto"
-        >
+        <Button onClick={OnGenerateTrip} disabled={loading} size="lg">
           {loading ? (
-            <>
-              <AiOutlineLoading3Quarters className="h-5 w-5 animate-spin mr-2" />
-              Generating... {/* Changed text while loading */}
-            </>
+            <AiOutlineLoading3Quarters className="h-6 w-6 animate-spin" />
           ) : (
             "Plan your Trip!"
           )}
         </Button>
       </div>
 
-      {/* Login Dialog */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        {" "}
-        {/* Allow closing dialog by clicking outside */}
         <DialogContent>
           <DialogHeader>
-            {/* Dialog Title moved inside DialogHeader for better structure */}
-            {/* <DialogTitle>Sign In Required</DialogTitle>  */}
-            <DialogDescription>
-              <div className="flex justify-between items-center mb-4">
-                <img
-                  src="/guidemeai.png"
-                  alt="GuideMe AI Logo"
-                  className="h-8 w-auto"
-                />{" "}
-                {/* Adjusted size */}
-                {/* Close button can be handled by shadcn Dialog's default */}
-                {/* <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setOpenDialog(false)}> X </Button> */}
+            <DialogDescription asChild>
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <img
+                    src="/guidemeai.png"
+                    alt="GuideMe AI Logo"
+                    className="head-logo w-32 h-auto"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full"
+                    onClick={() => setOpenDialog(false)}
+                  >
+                    X<span className="sr-only">Close</span>
+                  </Button>
+                </div>
+                <h2 className="font-bold text-lg mt-4">Sign In With Google</h2>
+                <p className="text-sm text-gray-600">
+                  Sign in securely to save and view your trips.
+                </p>
+                <Button
+                  onClick={loginWithGoogle}
+                  className="mt-5 w-full flex gap-3 items-center justify-center"
+                >
+                  <FcGoogle className="h-6 w-6" />
+                  Sign In with Google
+                </Button>
               </div>
-              <h2 className="font-bold text-lg mt-5 text-center">
-                Sign In With Google
-              </h2>
-              <p className="text-center text-gray-600 mb-5">
-                Please sign in to generate and save your trip itinerary.
-              </p>
-              <Button
-                onClick={loginWithGoogle}
-                className="w-full flex gap-4 items-center justify-center" // Centered content
-                variant="outline" // Optional: Style preference
-              >
-                <FcGoogle className="h-6 w-6" /> {/* Adjusted size */}
-                Sign In with Google
-              </Button>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
